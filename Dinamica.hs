@@ -67,6 +67,8 @@ gameOver jogo = worker casas jogo
         b x = (\(_,a,_) -> a) $ getElem (fst x) (snd x) jogo
         
 
+        
+-- Para testes
 semente = mkStdGen 1
 qtde = 4 :: Int
 tamanho = 50 :: Int

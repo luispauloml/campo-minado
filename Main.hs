@@ -21,9 +21,4 @@ estadoInicial g n t = elementwise3 (\a b c -> (a,b,c)) blank matrixBombas pontos
 
 
 main :: IO ()
-main = do [n,t] <- getArgs
-          g     <- getStdGen
-          print $ estadoInicial g (rI n) (rI t)
-          print $ gerarPontos (rI t) $ gerarBombas g (rI n) (rI t)
-            where rI :: String -> Int 
-                  rI x = read x
+main = undefined

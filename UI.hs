@@ -5,11 +5,10 @@ import Data.Matrix
 import Data.Char
 
 import Tipos
-import Dinamica
 
 showCampo :: Campo -> String
 showCampo campo = (++) ( intercalate "\n"
-                       $ ("   " ++ ['A'..(chr $ (ncols teste4) + ord 'A' - 1)]) : worker 
+                       $ ("   " ++ ['A'..(chr $ (ncols campo) + ord 'A' - 1)]) : worker 
                        ) "\n"
   where  worker = zipWith (++) (map showNum [1..(nrows campo)]) $ converter campo
          showNum x = if x < 10 then " " ++ (show x) ++ " " else (show x) ++ " "

@@ -23,7 +23,7 @@ vizinhanca (x,y) = [ (x-1,y-1) , (x  ,y-1) , (x+1,y-1)
                    , (x-1,y  ) ,             (x+1,y  )
                    , (x-1,y+1) , (x  ,y+1) , (x+1,y+1) ]
                    
--- Flood fill em 4 direções
+-- Flood fill em 4 direções para matrizes
 floodMatrix :: (Int,Int)   -- Posicao incial
             -> (a -> Bool) -- Funçao de condiçao
             -> (a -> a)    -- Funçao de mudança (se condição foi falsa)
