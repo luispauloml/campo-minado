@@ -19,6 +19,6 @@ executable campo-minado
   main-is:             Main.hs
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base >=4.9 && <4.10, matrix, random
+  build-depends:       base >=4.9 && <4.10, matrix, random, split
   -- hs-source-dirs:      
   default-language:    Haskell2010

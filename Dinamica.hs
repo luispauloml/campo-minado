@@ -9,7 +9,9 @@ import Basico
 
 -- Gerar posicao das bombas (g: semente; n: quantidade; t: tamanho)
 gerarBombas :: StdGen -> Int -> Int -> [Posicao]
-gerarBombas g n t =  take n $ nub . pares $ randomRs (1,t) g
+gerarBombas g n t =  if n > t*t
+                     then take (t*t) $ nub . pares $ randomRs (1,t) g
+                     else take n $ nub . pares $ randomRs (1,t) g
   where pares [] = []
         pares (a:b:ps) = (a,b) : pares ps
         
@@ -70,7 +72,7 @@ gameOver jogo = worker Derrota $ toList jogo
         
 -- Para testes
 semente = mkStdGen 1
-qtde = 2 :: Int
+qtde = 5 :: Int
 tamanho = 10 :: Int
         
 teste1 = gerarBombas semente qtde tamanho

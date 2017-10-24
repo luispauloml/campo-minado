@@ -26,9 +26,10 @@ main = do a <- getArgs
                    t = read . head . tail $ a :: Int
                    m = head (a !! 2)
                    in if m == 'g'
-                      the:n error "Modo gráfico ainda nào foi implementado."
-                      else if n > t 
-                      then error "Número de bombas deve ser menor que o tamanho."
+                      then error "Modo gráfico ainda nào foi implementado."
+                      else if n > t*t 
+                      then error $ "Número de bombas deve ser menor "++
+                                   "que o quadrado do tamanho."
                       else jogar g n t
           
           
