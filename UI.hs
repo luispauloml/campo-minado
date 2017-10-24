@@ -20,5 +20,5 @@ showCampo campo = (++) ( intercalate "\n"
              | s == Descoberto && b /= True 
                                && p == 0    = ' '               : extrairEstado ps
              | s == Descoberto && b /= True = (head . show $ p) : extrairEstado ps
-             | s == Descoberto && b == True = '*'               : extrairEstado ps
+             | s == Descoberto && b == True = '@'               : extrairEstado ps
 

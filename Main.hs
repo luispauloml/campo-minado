@@ -11,14 +11,25 @@ import Entrada
 import Tipos
 import UI
 
--- Gerar inicio do jogo (g: semente; n: quantidade; t: tamanho)
-estadoInicial :: StdGen -> Int -> Int -> Campo
-estadoInicial g n t = elementwise3 (\a b c -> (a,b,c)) blank matrixBombas pontos
-  where listaBombas    = gerarBombas g n t
-        matrixBombas   = posicionarBombas t listaBombas
-        blank  = matrix t t (const Coberto)
-        pontos = gerarPontos t listaBombas
-
+        
+jogar :: StdGen -> Int -> Int -> IO ()
+jogar g n t = do printf $ showCampo $ descobrirTudo $ gerarCampo g n t
+                 x <- getLine
+                 print x
 
 main :: IO ()
-main = undefined
+main = do a <- getArgs
+          g <- getStdGen
+          if length a /= 3
+          then usoMain
+          else let n = read . head        $ a :: Int
+                   t = read . head . tail $ a :: Int
+                   m = head (a !! 2)
+                   in if m == 'g'
+                      the:n error "Modo gráfico ainda nào foi implementado."
+                      else if n > t 
+                      then error "Número de bombas deve ser menor que o tamanho."
+                      else jogar g n t
+          
+          
+          

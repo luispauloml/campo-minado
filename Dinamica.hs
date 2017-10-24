@@ -21,10 +21,20 @@ posicionarBombas tam pos = substML (repeat True) pos $ matrix tam tam (const Fal
 gerarPontos :: Int -> [Posicao] -> Matrix Int
 gerarPontos tam pos = worker pos $ matrix tam tam (const 0)
   where worker []     m = m
-        worker (p:ps) m = worker ps $ somar m $ filtar . vizinhanca $ p
-        somar m ps      = elementwise (+) m $ substML (repeat 1) ps $ matrix tam tam (const 0)
-        filtar ps       = filter (\p -> if fst p < 1 || fst p > tam || 
-                                           snd p < 1 || snd p > tam then False else True) ps
+        worker (p:ps) m = worker ps $ elementwise (+) m $ pontos
+                                    $ filtrar . vizinhanca $ p
+        pontos  ps = substML (repeat 1) ps $ matrix tam tam (const 0)
+        filtrar    = filter (\(i,j) -> if i < 1 || i > tam 
+                                       || j < 1 || j > tam
+                                       then False 
+                                       else True )
+
+-- Gerar tabuleiro completo
+gerarCampo :: StdGen -> Int -> Int -> Campo
+gerarCampo g n t = elementwise3 (,,) (matrix t t (const Coberto)) mb mp
+  where b  = gerarBombas g n t
+        mb = posicionarBombas t b
+        mp = gerarPontos t b
 
 -- Descobrir o mapa
 descobrirMapa :: Posicao -> Campo -> Campo
@@ -34,20 +44,15 @@ descobrirMapa (i,j) c = floodMatrix (i,j) avaliar descobrir parar c
                           | otherwise       = False
         descobrir (s,b,p) | s == Coberto    = (Descoberto,b,p)
                           | otherwise       = (s,b,p)
-        parar     (s,b,p) | s == Coberto    = (Descoberto,b,p)
-                          | otherwise       = (s,b,p)
+        parar             = descobrir 
         
 -- Marcar casa
 marcarCasa :: Posicao ->  Campo -> Campo
-marcarCasa (i,j) m = setElem (worker x) (i,j) m
-  where x = getElem i j m
-        s = (\(a,_,_) -> a) x
-        b = (\(_,a,_) -> a) x
-        p = (\(_,_,a) -> a) x
-        worker a | s == Marcado    = (Coberto,b,p)
-                 | s == Coberto    = (Marcado,b,p)
-                 | s == Descoberto = (s,b,p)
-                 
+marcarCasa (i,j) m = let (s,b,p) = getElem i j m in
+                     case s of Marcado    -> setElem (Coberto,b,p) (i,j) m
+                               Coberto    -> setElem (Marcado,b,p) (i,j) m
+                               Descoberto -> m
+
 -- Descobrir todo o mapa
 descobrirTudo :: Campo -> Campo
 descobrirTudo campo = matrix (nrows campo) (ncols campo) worker
@@ -55,25 +60,20 @@ descobrirTudo campo = matrix (nrows campo) (ncols campo) worker
                  
 -- Verifica se o jogo continua ou é interrompido
 gameOver :: Campo -> GameOver
-gameOver jogo = worker casas jogo
-  where casas = [(a,b) | a <- [1..(nrows jogo)] , b <- [1..(ncols jogo)]]
-        worker []     _ = Vitoria
-        worker (p:ps) m
-            |  s p == Descoberto                 && b p == True  = Derrota
-            | (s p == Coberto || s p == Marcado) && b p == False = Continua
-            | (s p == Coberto || s p == Marcado) && b p == True  = worker ps m
-            | otherwise = worker ps m
-        s x = (\(a,_,_) -> a) $ getElem (fst x) (snd x) jogo
-        b x = (\(_,a,_) -> a) $ getElem (fst x) (snd x) jogo
-        
-
+gameOver jogo = worker Derrota $ toList jogo
+  where worker Derrota  [] = Vitoria
+        worker Continua [] = Continua
+        worker m ((s,b,p):xs) 
+            |  s == Descoberto               && b == True  = Derrota
+            | (s == Coberto || s == Marcado) && b == False = worker Continua xs
+            | otherwise = worker m xs
         
 -- Para testes
 semente = mkStdGen 1
-qtde = 4 :: Int
-tamanho = 50 :: Int
+qtde = 2 :: Int
+tamanho = 10 :: Int
         
 teste1 = gerarBombas semente qtde tamanho
 teste2 = posicionarBombas tamanho teste1
 teste3 = gerarPontos tamanho teste1
-teste4 = elementwise3 (\a b c -> (a,b,c)) (matrix tamanho tamanho (const Coberto)) teste2 teste3
+teste4 = gerarCampo semente qtde tamanho

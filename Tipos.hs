@@ -12,7 +12,9 @@ data GameOver = Continua  -- jogo continua
               deriving (Eq,Show)
             
 -- informações sobre a casa
-type Casa = (Estado, Bool, Int)
+type Casa = ( Estado    -- se está marcada ou não
+            , Bool      -- se há bomba ou não
+            , Int )     -- a pontuação da casa
 
 -- estado do campo minado
 type Campo = Matrix Casa
@@ -27,4 +29,5 @@ instance Show Estado where
     show Marcado    = "M"
     show Coberto    = "C"
     show Descoberto = "D"
+
     
