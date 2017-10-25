@@ -30,4 +30,10 @@ instance Show Estado where
     show Coberto    = "C"
     show Descoberto = "D"
 
+instance Read Estado where
+    readsPrec _ ('#':resto) = [(Marcado,resto)]
+    readsPrec _ ('M':'a':'r':'c':'a':'d':'o':resto) = [(Marcado,resto)]
+    readsPrec _ ('C':'o':'b':'e':'r':'t':'o':resto) = [(Coberto,resto)]
+    readsPrec _ ('D':'e':'s':'c':'o':'b':'e':'r':'t':'o':resto) = [(Descoberto,resto)]
+    readsPrec _ _ = []
     

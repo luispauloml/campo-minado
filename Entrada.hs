@@ -5,6 +5,7 @@ import Text.Read (readMaybe)
 import Data.List.Split (endBy)
 import Control.Monad
 import Data.Char (ord, chr)
+import Data.Tuple (swap)
 
 import Tipos
 
@@ -18,6 +19,7 @@ usoMain = do
              "  Obs: no modo texto, recomendável menor que 26 e no máximo 57.\n" ++
              "<<Se modo texto por escolhido>>\n"
     usoEntrada
+    getChar >>= (\_ -> return ())
 
 -- Mensage de instrução para jogar no modo texto
 usoEntrada :: IO ()
@@ -25,32 +27,32 @@ usoEntrada = do
     printf $ "Para entar o movimento deve-se digitar separados por espaço:\n" ++
              "  1) Letra da coluna;\n" ++
              "  2) Número da linha;\n" ++
-             "  3) O marca # se quiser marcar a posição (opcional).\n"
+             "  3) A marca \'#\' se quiser marcar a posição (opcional).\n" ++
+             "  Obs.: Para abortar, entre \'q\'."
 
 -- Parser para entrada de texto
 parseEntrada :: String -> Maybe (Posicao, Estado)
-parseEntrada s = entrada2move $ filter (not . null) $ endBy " " s
+parseEntrada s = if s == "q" || s == "Q"
+                 then error "Jogo interrompido."
+                 else entrada2move $ filter (not . null) $ endBy " " s
 
 -- Converte string de entrada
 entrada2move :: [String] -> Maybe (Posicao, Estado)
 entrada2move s = let c     = length s
-                     nlin  = return $ ord (head . head $ s) - ord 'A' + 1
-                     ncol  = readMaybe (s !! 1) :: Maybe Int
-                     marc  = if head (s !! 2) == '#' then Just 1 else Nothing
-                 in case c of 2 -> sequence [nlin,ncol,(Just 0)] >>= saida
-                              3 -> sequence [nlin,ncol,marc] >>= saida
+                     ncol  = return $ ord (head . head $ s) - ord 'A' + 1
+                     nlin  = readMaybe (s !! 1) :: Maybe Int
+                     marc  = readMaybe (s !! 2) :: Maybe Estado
+                 in case c of 2 -> liftM2 (,) (liftM2 (,) nlin ncol) $ Just Descoberto
+                              3 -> liftM2 (,) (liftM2 (,) nlin ncol) $ marc
                               _ -> Nothing
-                 where saida = (\ (a:b:c:xs) -> return ( (a,b)
-                                                       , if c == 1 
-                                                         then Marcado 
-                                                         else Descoberto ) )
 
 -- Valida a jogada de acordo com o tamanho do campo
-validarMove :: Maybe (Posicao, Estado) -> Int -> Maybe (Posicao, Estado)
-validarMove m t = m >>= (\((l,c),s) -> if l < 1 || l > t || c < 1 || c > t
-                                       then return ((l,c),s)
-                                       else Nothing )
-                                       
+validarMove :: Int -> Maybe (Posicao, Estado) -> Maybe (Posicao, Estado)
+validarMove t m = m >>= (\((l,c),s) -> if l < 1 || l > t || c < 1 || c > t
+                                       then Nothing
+                                       else return ((l,c),s) )
+
+
 
   
   

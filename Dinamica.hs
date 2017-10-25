@@ -45,6 +45,7 @@ descobrirMapa (i,j) c = floodMatrix (i,j) avaliar descobrir parar c
                           | p > 0           = True
                           | otherwise       = False
         descobrir (s,b,p) | s == Coberto    = (Descoberto,b,p)
+                          | s == Marcado    = (Descoberto,b,p)
                           | otherwise       = (s,b,p)
         parar             = descobrir 
         
@@ -59,6 +60,11 @@ marcarCasa (i,j) m = let (s,b,p) = getElem i j m in
 descobrirTudo :: Campo -> Campo
 descobrirTudo campo = matrix (nrows campo) (ncols campo) worker
   where worker (i,j) = (\(_,b,p) -> (Descoberto,b,p)) (getElem i j campo)
+  
+-- Ação no mapa
+acaoMapa :: Campo -> (Posicao, Estado) -> Campo
+acaoMapa m ((i,j),Marcado) = marcarCasa    (i,j) m
+acaoMapa m ((i,j),_)       = descobrirMapa (i,j) m
                  
 -- Verifica se o jogo continua ou é interrompido
 gameOver :: Campo -> GameOver

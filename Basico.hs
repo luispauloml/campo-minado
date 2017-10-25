@@ -31,7 +31,7 @@ floodMatrix :: (Int,Int)   -- Posicao incial
             -> Matrix a    -- Matriz de entrada
             -> Matrix a    -- Matriz de saída
 floodMatrix (i,j) cond mud par ent
-    |  i < 1 || i > nrows ent 
+    |  i < 1 || i > nrows ent   
     || j < 1 || j > ncols ent = ent
     | cond x == True  =      setElem (par x) (i,j) ent
     | cond x == False = f' $ setElem (mud x) (i,j) ent

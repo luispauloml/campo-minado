@@ -1,21 +1,27 @@
 module Main where
 
-import System.Random
 import Data.Matrix
-import System.Environment
 import Text.Printf
+import System.Environment
+import System.Random
+import System.Console.ANSI (clearScreen)
 
 import Basico
 import Dinamica
 import Entrada
 import Tipos
 import UI
-
-        
+                 
 jogar :: StdGen -> Int -> Int -> IO ()
-jogar g n t = do printf $ showCampo $ descobrirTudo $ gerarCampo g n t
-                 x <- getLine
-                 print x
+jogar g n t =
+  let mapa        = gerarCampo g n t
+      imprimir    = printf . showCampo
+  in do imprimir mapa
+        loopTexto mapa
+        getChar >>= (\_ -> return ())
+
+jogarG :: StdGen -> Int -> Int -> IO()
+jogarG = undefined
 
 main :: IO ()
 main = do a <- getArgs
@@ -30,7 +36,8 @@ main = do a <- getArgs
                       else if n > t*t 
                       then error $ "Número de bombas deve ser menor "++
                                    "que o quadrado do tamanho."
-                      else jogar g n t
+                      else do clearScreen
+                              jogar g n t
           
           
           
