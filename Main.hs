@@ -1,6 +1,7 @@
 module Main where
 
-import Data.Matrix
+import Graphics.Gloss
+import Graphics.Gloss.Interface.IO.Game
 import Text.Printf
 import System.Environment
 import System.Random
@@ -8,10 +9,11 @@ import System.Console.ANSI (clearScreen)
 
 import Basico
 import Dinamica
-import Entrada
 import Tipos
+import Graficos
 import UI
-                 
+
+-- Jogo no modo texto
 jogar :: StdGen -> Int -> Int -> IO ()
 jogar g n t =
   let mapa        = gerarCampo g n t
@@ -20,8 +22,27 @@ jogar g n t =
         loopTexto mapa
         getChar >>= (\_ -> return ())
 
+-- Jogo com gráficos
 jogarG :: StdGen -> Int -> Int -> IO()
-jogarG = undefined
+jogarG g n t = playIO (InWindow  "Campo Minado" (s, s) (40,40)) 
+                     (greyN 0.95) 
+                     30
+                     (gerarCampo g n t) 
+                     (renderCampo t)
+                     (capturaClique t)
+                     (\a b -> return b)
+  where s = t * (fromEnum $ fst tamBloco)
+
+
+glossPlay :: Int -> IO ()
+glossPlay t = playIO (InWindow  "Campo Minado" (s, s) (40,40)) 
+                     white 
+                     30
+                     testeMundo 
+                     (renderCampo t)
+                     (\a b -> return b)
+                     (\a b -> return b)
+  where s = t * (fromEnum $ fst tamBloco)
 
 main :: IO ()
 main = do a <- getArgs
@@ -32,12 +53,9 @@ main = do a <- getArgs
                    t = read . head . tail $ a :: Int
                    m = head (a !! 2)
                    in if m == 'g'
-                      then error "Modo gráfico ainda nào foi implementado."
-                      else if n > t*t 
-                      then error $ "Número de bombas deve ser menor "++
-                                   "que o quadrado do tamanho."
+                      then jogarG g n t
                       else do clearScreen
                               jogar g n t
           
-          
+ 
           

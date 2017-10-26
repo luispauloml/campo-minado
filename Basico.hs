@@ -41,6 +41,23 @@ floodMatrix (i,j) cond mud par ent
                    floodMatrix (i,j+1) cond mud par $
                    floodMatrix (i,j-1) cond mud par m
 
-
+-- Converte indices das matrizes para pixels
+ind2pix :: Float -> Float -> (Int, Int) -> (Float, Float)
+ind2pix janela bloco (i,j) = (x0 + xp, y0 + yp)
+  where x0 = -janela / 2
+        y0 =  janela / 2
+        xp =  (fromIntegral j) * bloco - (bloco / 2)
+        yp = -(fromIntegral i) * bloco + (bloco / 2)
+        
+-- Converte pixels para indice das matrizes (c: largura da casa, b: borda da casa)
+pix2pos :: Int -> (Float, Float) -> (Float,Float) -> Maybe Posicao
+pix2pos t (c,b) (x,y)
+    | (abs x) > lmax || (abs y) > lmax                                = Nothing
+    | (x' `mod` c') < b' `div` 2 || (x' `mod` c') > (b' `div` 2) + c' = Nothing
+    | (y' `mod` c') < b' `div` 2 || (y' `mod` c') > (b' `div` 2) + c' = Nothing
+    | otherwise = return $ (1 + y' `div` c' , 1 + x' `div` c')
+        where lmax = c * (fromIntegral t) / 2
+              (c',b') = (round c, round b)
+              (x',y') = (round $ lmax + x, round $ abs $ y - lmax) :: (Int, Int)
 
 

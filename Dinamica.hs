@@ -10,7 +10,8 @@ import Basico
 -- Gerar posicao das bombas (g: semente; n: quantidade; t: tamanho)
 gerarBombas :: StdGen -> Int -> Int -> [Posicao]
 gerarBombas g n t =  if n > t*t
-                     then take (t*t) $ nub . pares $ randomRs (1,t) g
+                     then error $ "Número de bombas deve ser menor "++
+                                  "que o quadrado do tamanho do campo"
                      else take n $ nub . pares $ randomRs (1,t) g
   where pares [] = []
         pares (a:b:ps) = (a,b) : pares ps
