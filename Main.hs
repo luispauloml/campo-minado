@@ -7,7 +7,6 @@ import System.Environment
 import System.Random
 import System.Console.ANSI (clearScreen)
 
-import Basico
 import Dinamica
 import Tipos
 import Graficos
@@ -20,7 +19,7 @@ jogar g n t =
       imprimir    = printf . showCampo
   in do imprimir mapa
         loopTexto mapa
-        getChar >>= (\_ -> return ())
+        getLine >>= (\_ -> return ())
 
 -- Jogo com gráficos
 jogarG :: StdGen -> Int -> Int -> IO()
@@ -30,17 +29,6 @@ jogarG g n t = playIO (InWindow  "Campo Minado" (s, s) (40,40))
                      (gerarCampo g n t) 
                      (renderCampo t)
                      (capturaClique t)
-                     (\a b -> return b)
-  where s = t * (fromEnum $ fst tamBloco)
-
-
-glossPlay :: Int -> IO ()
-glossPlay t = playIO (InWindow  "Campo Minado" (s, s) (40,40)) 
-                     white 
-                     30
-                     testeMundo 
-                     (renderCampo t)
-                     (\a b -> return b)
                      (\a b -> return b)
   where s = t * (fromEnum $ fst tamBloco)
 

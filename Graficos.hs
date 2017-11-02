@@ -1,8 +1,6 @@
 module Graficos where
 
 import Text.Printf 
-import Text.Read 
-import Control.Monad
 import Data.Char (ord, chr)
 import Data.List (intercalate)
 import Data.Matrix
@@ -10,31 +8,34 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 import System.Console.ANSI (clearScreen)
 
-import Basico
 import Tipos
 import Dinamica
 
-
-testeMundo :: Campo
-testeMundo = descobrirTudo $ descobrirMapa (5,6) $ marcarCasa (10,8) $ descobrirMapa (1,1) teste4
-
--- tamanho do bloco e borda interna
+---- ## MODO GRÁFICO ## -------------------------------------------------------
+-- tamanho do bloco e borda interna (para modo gráfico)
 tamBloco = (25,2) :: (Float, Float)
 
+-- Renderiza o campo completamente
 renderCampo :: Int -> Campo -> IO Picture
 renderCampo t m = 
-  let cs = toList m
-      ds = toList $ descobrirTudo m
-      ps = [(i,j) | i <- [1..t], j <- [1..t]]
-      gO = gameOver m
+  let cs = toList m                 -- todas as casas
+      ds = toList $ descobrirTudo m -- todas as casas descobertas (em caso de derrota)
+      ps = [(i,j) | i <- [1..t], j <- [1..t]] -- posições
+      gO = gameOver m -- verifica se o jogo continua
   in  case gO of Continua -> return $ pictures $ zipWith (casa2bloco t gO) cs ps
-                 _        -> return $ pictures $ zipWith (casa2bloco t gO) ds ps
+                 Derrota  -> return $ pictures $ (zipWith (casa2bloco t gO) ds ps)
+                                                 ++ [text "Fim de jogo!"]
+                 Vitoria  -> return $ pictures $ (zipWith (casa2bloco t gO) ds ps)
+                                                 ++ [text "Vitoria!"]
+                                                 
+                                                 
 
-  
-             
+-- Converte uma casa em uma figura do Gloss (t: tamanho do campo; g: GameOver)
 casa2bloco :: Int -> GameOver -> Casa -> (Int,Int) -> Picture
 casa2bloco t g (s,b,p) (i,j)
-    | s == Descoberto = if p == 0 
+    | s == Marcado    = translate' pos $ color violet      $ rectangleSolid l l
+    | s == Coberto    = translate' pos $ color (greyN 0.5) $ rectangleSolid l l
+    | s == Descoberto = if p == 0 -- agir de acordo com a pontuação da casa
                         then translate' pos $ color (greyN 0.5) $ rectangleWire l l
                         else if b && (g == Derrota)
                              then pictures [ translate' pos $ color red $
@@ -51,27 +52,26 @@ casa2bloco t g (s,b,p) (i,j)
                                                 , translate' pos $ 
                                                   color (greyN 0.5) $ 
                                                   rectangleWire l l ]
-    | s == Marcado    = translate' pos $ color violet      $ rectangleSolid l l
-    | s == Coberto    = translate' pos $ color (greyN 0.5) $ rectangleSolid l l
-      where pos = ind2pix ((fst tamBloco) * fromIntegral t) (fst tamBloco) (i,j)
+      where -- converter de (i,j) para pixels
+            pos = ind2pix ((fst tamBloco) * fromIntegral t) (fst tamBloco) (i,j)
+            -- adaptação da função translate
             translate' (a,b) = translate a b
+            -- adaptação da função traslate para potuação (empirico)
             translateT (a,b) = translate (a - 35 * e) (b - 50 * e)
-            l = (fst tamBloco) - (snd tamBloco) 
+            -- lado do quadrado que forma uma casa
+            l = (fst tamBloco) - (snd tamBloco)
+            -- reduzir escala dos textos (empirico)
             e = ((fst tamBloco) - 3) / 200
+            
+-- Converte indices das matrizes para pixels
+ind2pix :: Float -> Float -> (Int, Int) -> (Float, Float)
+ind2pix janela bloco (i,j) = (x0 + xp, y0 + yp)
+  where x0 = -janela / 2
+        y0 =  janela / 2
+        xp =  (fromIntegral j) * bloco - (bloco / 2)
+        yp = -(fromIntegral i) * bloco + (bloco / 2)
 
-
-
-
-
-
-
-
-
-
-
-
-
----- ## MODO TEXTO ## ----------------------------------------------------------------
+---- ## MODO TEXTO ## ---------------------------------------------------------
 -- Renderiza o campo no modo texto
 showCampo :: Campo -> String
 showCampo campo = (++) ( intercalate "\n"
@@ -82,21 +82,8 @@ showCampo campo = (++) ( intercalate "\n"
          converter m = map extrairEstado $ toLists m
          extrairEstado []     = []
          extrairEstado ((s,b,p):ps)
-             | s == Marcado                 = '#'               : extrairEstado ps
-             | s == Coberto                 = '-'               : extrairEstado ps
-             | s == Descoberto && b /= True 
-                               && p == 0    = ' '               : extrairEstado ps
-             | s == Descoberto && b /= True = (head . show $ p) : extrairEstado ps
-             | s == Descoberto && b == True = '*'               : extrairEstado ps
-
-                               
-                               
-        
-                  
-                    
-    
-                              
-                              
-                              
-
-       
+             | s == Marcado              = '#'               : extrairEstado ps
+             | s == Coberto              = '-'               : extrairEstado ps
+             | s == Descoberto && b      = '@'  {-bomba-}    : extrairEstado ps
+             | s == Descoberto && p == 0 = ' '               : extrairEstado ps
+             | otherwise                 = (head . show $ p) : extrairEstado ps
