@@ -1,6 +1,5 @@
 module Graficos where
 
-import Text.Printf 
 import Data.Char (ord, chr)
 import Data.List (intercalate)
 import Data.Matrix
@@ -22,13 +21,8 @@ renderCampo t m =
       ds = toList $ descobrirTudo m -- todas as casas descobertas (em caso de derrota)
       ps = [(i,j) | i <- [1..t], j <- [1..t]] -- posições
       gO = gameOver m -- verifica se o jogo continua
-  in  case gO of Continua -> return $ pictures $ zipWith (casa2bloco t gO) cs ps
-                 Derrota  -> return $ pictures $ (zipWith (casa2bloco t gO) ds ps)
-                                                 ++ [text "Fim de jogo!"]
-                 Vitoria  -> return $ pictures $ (zipWith (casa2bloco t gO) ds ps)
-                                                 ++ [text "Vitoria!"]
-                                                 
-                                                 
+  in case gO of Continua -> return $ pictures $ zipWith (casa2bloco t gO) cs ps
+                _        -> return $ pictures $ zipWith (casa2bloco t gO) ds ps
 
 -- Converte uma casa em uma figura do Gloss (t: tamanho do campo; g: GameOver)
 casa2bloco :: Int -> GameOver -> Casa -> (Int,Int) -> Picture
@@ -41,12 +35,12 @@ casa2bloco t g (s,b,p) (i,j)
                              then pictures [ translate' pos $ color red $
                                              rectangleSolid l l
                                            , translateT pos $ scale e e $
-                                             text "@" ]
+                                             color white $ text "@" ]
                              else if b && (g == Vitoria)
                                   then pictures [ translate' pos $ color violet $
                                                   rectangleSolid l l
                                                 , translateT pos $ scale e e $
-                                                  text "@" ]
+                                                  color white $ text "@" ]
                                   else pictures [ translateT pos $ scale e e $
                                                   text (show p)
                                                 , translate' pos $ 
@@ -74,9 +68,8 @@ ind2pix janela bloco (i,j) = (x0 + xp, y0 + yp)
 ---- ## MODO TEXTO ## ---------------------------------------------------------
 -- Renderiza o campo no modo texto
 showCampo :: Campo -> String
-showCampo campo = (++) ( intercalate "\n"
-                       $ ("   " ++ ['A'..(chr $ (ncols campo) + ord 'A' - 1)]) : worker 
-                       ) "\n"
+showCampo campo = intercalate "\n" 
+                $ ("   " ++ ['A'..(chr $ (ncols campo) + ord 'A' - 1)]) : worker 
   where  worker = zipWith (++) (map showNum [1..(nrows campo)]) $ converter campo
          showNum x = if x < 10 then " " ++ (show x) ++ " " else (show x) ++ " "
          converter m = map extrairEstado $ toLists m

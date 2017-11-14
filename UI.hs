@@ -9,7 +9,6 @@ import Data.Maybe
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
 import System.Console.ANSI (clearScreen)
-import Text.Printf (printf)
 import Text.Read (readMaybe)
 
 import Tipos
@@ -19,23 +18,23 @@ import Graficos
 -- Mensagem de uso do campo-minado
 usoMain :: IO ()
 usoMain = do 
-    printf $ "campo-minado exige três argumentos:\n" ++
-             "  1) Quantidade de bombas;\n" ++
-             "  2) Tamanho do campo;\n" ++
-             "  3) Modo texto ou gráfico: \"t\" ou \"g\".\n" ++
-             "  Obs: no modo texto, recomendável menor que 26 e no máximo 57.\n" ++
-             "<<Se modo texto por escolhido>>\n"
+    putStrLn $ "campo-minado exige três argumentos:\n" ++
+               "  1) Quantidade de bombas;\n" ++
+               "  2) Tamanho do campo;\n" ++
+               "  3) Modo texto ou gráfico: \"t\" ou \"g\".\n" ++
+               "  Obs: no modo texto, recomendável menor que 26 e no máximo 57.\n" ++
+               "<<Se modo texto por escolhido>>"
     usoEntrada
-    getChar >>= (\_ -> return ())
+    getLine >>= const (return ())
 
 -- Mensage de instrução para jogar no modo texto
 usoEntrada :: IO ()
 usoEntrada = do
-    printf $ "Para entar o movimento deve-se digitar separados por espaço:\n" ++
-             "  1) Letra da coluna;\n" ++
-             "  2) Número da linha;\n" ++
-             "  3) A marca \'#\' se quiser marcar a posição (opcional).\n" ++
-             "  Obs.: Para abortar, entre \'q\'.\n"
+    putStrLn $ "Para entar o movimento deve-se digitar separados por espaço:\n" ++
+               "  1) Letra da coluna;\n" ++
+               "  2) Número da linha;\n" ++
+               "  3) A marca \'#\' se quiser marcar a posição (opcional).\n" ++
+               "  Obs.: Para abortar, entre \'q\'."
 
                                        
 ---- ## MODO GRÁFICO ## --------------------------------------------------------------
@@ -76,7 +75,7 @@ pedirEntrada = parseEntrada `fmap` getLine
 -- Converte string de entrada
 entrada2move :: [String] -> Maybe (Posicao, Estado)
 entrada2move s = let c     = length s
-                     ncol  = return $ ord (head (s !! 0)) - (ord 'A') + 1
+                     ncol  = Just $ ord (head (s !! 0)) - (ord 'A') + 1
                      nlin  = readMaybe (s !! 1) :: Maybe Int
                      marc  = readMaybe (s !! 2) :: Maybe Estado
                  in case c of 2 -> liftM2 (,) (liftM2 (,) nlin ncol) $ Just Descoberto
@@ -91,7 +90,7 @@ atualizarCampoTexto mapa =
      then do clearScreen
              putStrLn "Entrada inválida."
              usoEntrada
-             printf $ showCampo mapa
+             putStrLn $ showCampo mapa
              atualizarCampoTexto mapa
      else let s = acaoMapa mapa $ fromJust e
           in  return s
@@ -105,7 +104,7 @@ validarMove t m = m >>= (\((l,c),s) -> if l < 1 || l > t || c < 1 || c > t
 -- Loop do jogo
 loopTexto :: Campo -> IO ()
 loopTexto m =
-  let imprimir = printf . showCampo
+  let imprimir = putStrLn . showCampo
   in do case gameOver m of Derrota  -> do clearScreen
                                           putStrLn "Você detonou uma bomba!"
                                           imprimir $ descobrirTudo m

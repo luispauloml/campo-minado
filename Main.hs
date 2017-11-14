@@ -2,7 +2,6 @@ module Main where
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.IO.Game
-import Text.Printf
 import System.Environment
 import System.Random
 import System.Console.ANSI (clearScreen)
@@ -16,10 +15,10 @@ import UI
 jogar :: StdGen -> Int -> Int -> IO ()
 jogar g n t =
   let mapa        = gerarCampo g n t
-      imprimir    = printf . showCampo
+      imprimir    = putStrLn . showCampo
   in do imprimir mapa
         loopTexto mapa
-        getLine >>= (\_ -> return ())
+        getLine >>= const (return ())
 
 -- Jogo com gráficos
 jogarG :: StdGen -> Int -> Int -> IO()
