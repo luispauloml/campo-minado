@@ -8,17 +8,17 @@ import Tipos
 
 -- Gerar posicao das bombas (g: semente; n: quantidade; t: tamanho)
 gerarBombas :: StdGen -> Int -> Int -> [Posicao]
-gerarBombas g n t =  if n > t*t
+gerarBombas g n t =  if n >= t*t
                      then error $ "Número de bombas deve ser menor " ++
                                   "que o quadrado do tamanho do campo"
                      else take n $ nub . pares $ randomRs (1,t) g
   where pares [] = []
         pares (a:b:ps) = (a,b) : pares ps
-        
+
 -- Gerar tabuleiro de bombas (tam: tamanho; pos: posicoes das bombas)
 posicionarBombas :: Int -> [Posicao] -> Matrix Bool
 posicionarBombas tam pos = matrix tam tam (\p -> p `elem` pos)
-        
+
 -- Gerar tabuleiro de pontucao (tam: tamanho; pos: posicoes das bombas)
 gerarPontos :: Int -> [Posicao] -> Matrix Int
 gerarPontos tam pos = matrix tam tam (worker pos)
@@ -64,7 +64,7 @@ floodMatrix (i,j) cond mud par ent
                    floodMatrix (i-1,j) cond mud par $
                    floodMatrix (i,j+1) cond mud par $
                    floodMatrix (i,j-1) cond mud par m        
-        
+
 -- Marcar casa
 marcarCasa :: Campo -> Posicao ->  Campo
 marcarCasa m (i,j) = let (s,b,p) = getElem i j m in
@@ -76,12 +76,12 @@ marcarCasa m (i,j) = let (s,b,p) = getElem i j m in
 descobrirTudo :: Campo -> Campo
 descobrirTudo campo = matrix (nrows campo) (ncols campo) worker
   where worker (i,j) = (\(_,b,p) -> (Descoberto,b,p)) (getElem i j campo)
-  
+
 -- Ação no mapa
 acaoMapa :: Campo -> (Posicao, Estado) -> Campo
 acaoMapa m ((i,j),Marcado) = marcarCasa    m (i,j)
 acaoMapa m ((i,j),_)       = descobrirMapa m (i,j)
-                 
+
 -- Verifica se o jogo continua ou é interrompido
 gameOver :: Campo -> GameOver
 gameOver jogo = worker True $ toList jogo

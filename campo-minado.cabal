@@ -7,12 +7,12 @@ synopsis:            Simple implementacao do jogo campo minado
 -- description:         
 license:             MIT
 license-file:        LICENSE
-author:              Luis Paulo Lima <github.com/luispauloml>
+author:              Luis Paulo Lima <http://github.com/luispauloml>
 -- maintainer:          
 -- copyright:           
 category:            Game
 build-type:          Simple
-extra-source-files:  ChangeLog.md
+-- extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 executable campo-minado

@@ -36,4 +36,3 @@ instance Read Estado where
     readsPrec _ ('C':'o':'b':'e':'r':'t':'o':resto) = [(Coberto,resto)]
     readsPrec _ ('D':'e':'s':'c':'o':'b':'e':'r':'t':'o':resto) = [(Descoberto,resto)]
     readsPrec _ _ = []
-    

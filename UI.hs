@@ -25,16 +25,15 @@ usoMain = do
                "  Obs: no modo texto, recomendável menor que 26 e no máximo 57.\n" ++
                "<<Se modo texto por escolhido>>"
     usoEntrada
-    getLine >>= const (return ())
+    getLine >> return ()
 
 -- Mensage de instrução para jogar no modo texto
 usoEntrada :: IO ()
-usoEntrada = do
-    putStrLn $ "Para entar o movimento deve-se digitar separados por espaço:\n" ++
-               "  1) Letra da coluna;\n" ++
-               "  2) Número da linha;\n" ++
-               "  3) A marca \'#\' se quiser marcar a posição (opcional).\n" ++
-               "  Obs.: Para abortar, entre \'q\'."
+usoEntrada = putStrLn $ "Para entar o movimento deve-se digitar separados por espaço:\n" ++
+                        "  1) Letra da coluna;\n" ++
+                        "  2) Número da linha;\n" ++
+                        "  3) A marca \'#\' se quiser marcar a posição (opcional).\n" ++
+                        "  Obs.: Para abortar, entre \'q\'."
 
                                        
 ---- ## MODO GRÁFICO ## --------------------------------------------------------------
@@ -50,7 +49,6 @@ capturaClique t (EventKey k s m (x,y)) c
    | otherwise 
         = return c
 capturaClique _ _ c = return c
-
 
 -- Converte pixels para indice das matrizes (c: largura da casa, b: borda da casa)
 pix2pos :: Int -> (Float,Float) -> Maybe Posicao
@@ -81,25 +79,24 @@ entrada2move s = let c     = length s
                  in case c of 2 -> liftM2 (,) (liftM2 (,) nlin ncol) $ Just Descoberto
                               3 -> liftM2 (,) (liftM2 (,) nlin ncol) $ marc
                               _ -> Nothing
-                              
+
 -- Lê jogada e atualiza o campo
 atualizarCampoTexto :: Campo -> IO Campo
-atualizarCampoTexto mapa =
-  do e <- validarMove (nrows mapa) `fmap` pedirEntrada
-     if isNothing e
-     then do clearScreen
-             putStrLn "Entrada inválida."
-             usoEntrada
-             putStrLn $ showCampo mapa
-             atualizarCampoTexto mapa
-     else let s = acaoMapa mapa $ fromJust e
-          in  return s
+atualizarCampoTexto mapa = do e <- validarMove (nrows mapa) `fmap` pedirEntrada
+                              if isNothing e
+                              then do clearScreen
+                                      putStrLn "Entrada inválida."
+                                      usoEntrada
+                                      putStrLn $ showCampo mapa
+                                      atualizarCampoTexto mapa
+                              else let s = acaoMapa mapa $ fromJust e
+                                   in  return s
 
 -- Valida a jogada de acordo com o tamanho do campo
 validarMove :: Int -> Maybe (Posicao, Estado) -> Maybe (Posicao, Estado)
-validarMove t m = m >>= (\((l,c),s) -> if l < 1 || l > t || c < 1 || c > t
-                                       then Nothing
-                                       else return ((l,c),s) )
+validarMove t m = m >>= (\ ((l,c),s) -> if l < 1 || l > t || c < 1 || c > t
+                                        then Nothing
+                                        else return ((l,c),s) )
 
 -- Loop do jogo
 loopTexto :: Campo -> IO ()
